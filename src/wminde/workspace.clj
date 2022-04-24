@@ -50,7 +50,30 @@
     (inc active-workspace)))
 
 
+
+(s/fdef set-active-workspace
+        :args (s/cat :num pos-int?)
+        :ret ::r/result)
+
+(defn set-active-workspace
+  "Set the active workspace (1-based).
+
+  NOTE: this will always return a successful result since the underlying tool
+  (xdotool) never indicates an error."
+  [num]
+  (b/cond
+    let [cmd-r (c/sh-r "xdotool" "set_desktop" (str (dec num)))]
+
+    (r/failed? cmd-r)
+    (assoc cmd-r :message (str "Failed to set the active workspace to " num))
+
+    :else
+    cmd-r))
+
+
+
 (comment
   (get-num-workspaces)
-  (get-active-workspace))
+  (get-active-workspace)
+  (set-active-workspace 1))
 
