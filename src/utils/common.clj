@@ -1,6 +1,7 @@
 (ns utils.common
   "Common/generic utilities."
   (:require [better-cond.core :as b]
+            [clojure.java.shell :as sh]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [clojure.java.io :as io]
@@ -118,4 +119,19 @@
    (Float/parseFloat input)
    (catch Exception _
      fallback)))
+
+
+
+(s/fdef sh-r
+        :args (s/cat :args (s/coll-of string?))
+        :ret ::r/result)
+
+(defn sh-r
+  "Run `sh/sh` and wrap in a result."
+  [& args]
+  (let [cmd-res (apply sh/sh args)]
+    (merge cmd-res
+           (if (zero? (:exit cmd-res))
+             (r/r :success (:out cmd-res))
+             (r/r :error (:err cmd-res))))))
 
