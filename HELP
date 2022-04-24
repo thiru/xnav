@@ -1,0 +1,17 @@
+wminde %s
+
+Window manager-like key bindings for (X11-based) desktop environments.
+
+USAGE: wminde <command> [<args>]
+
+COMMANDS:
+
+desktop, workspace [NUM]
+  Go to the specified desktop/workspace (1-based index)
+
+help, --help, -h
+  Show this help
+
+version, --version
+  Show current version
+
