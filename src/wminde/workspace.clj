@@ -28,6 +28,29 @@
 
 
 
+(s/fdef get-active-workspace
+        :ret (s/or :count int?
+                   :error-result ::r/result))
+
+(defn get-active-workspace
+  "Get the active workspace number (1-based)."
+  []
+  (b/cond
+    let [cmd-r (c/sh-r "xdotool" "get_desktop")]
+
+    (r/failed? cmd-r)
+    (assoc cmd-r :message "Failed to get the active workspace")
+
+    let [active-workspace (-> cmd-r :out str/trim c/parse-int)]
+
+    (not (pos-int? active-workspace))
+    (assoc cmd-r :message "Failed to get the active workspace")
+
+    :else
+    (inc active-workspace)))
+
+
 (comment
-  (get-num-workspaces))
+  (get-num-workspaces)
+  (get-active-workspace))
 
