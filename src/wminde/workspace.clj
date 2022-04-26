@@ -51,11 +51,11 @@
 
 
 
-(s/fdef set-active-workspace
+(s/fdef activate-workspace-num
         :args (s/cat :num pos-int?)
         :ret ::r/result)
 
-(defn set-active-workspace
+(defn activate-workspace-num
   "Set the active workspace (1-based).
 
   NOTE: this will always return a successful result since the underlying tool
@@ -77,8 +77,50 @@
 
 
 
+(s/fdef activate-next-workspace
+        :ret ::r/result)
+
+(defn activate-next-workspace
+  "Set the active workspace to the next (higher, 1-based) one.
+
+  NOTE: this will always return a successful result since the underlying tool
+  (xdotool) never indicates an error."
+  []
+  (b/cond
+    let [cmd-r (c/sh-r "xdotool" "set_desktop" "--relative" "--" "1")]
+
+    (r/failed? cmd-r)
+    (assoc cmd-r :message "Failed to activate the next workspace")
+
+    :else
+    cmd-r))
+
+
+
+(s/fdef activate-previous-workspace
+        :ret ::r/result)
+
+(defn activate-previous-workspace
+  "Set the active workspace to the previous (lower, 1-based) one.
+
+  NOTE: this will always return a successful result since the underlying tool
+  (xdotool) never indicates an error."
+  []
+  (b/cond
+    let [cmd-r (c/sh-r "xdotool" "set_desktop" "--relative" "--" "-1")]
+
+    (r/failed? cmd-r)
+    (assoc cmd-r :message "Failed to activate the previous workspace")
+
+    :else
+    cmd-r))
+
+
+
 (comment
   (get-num-workspaces)
   (get-active-workspace)
-  (set-active-workspace 1))
+  (activate-workspace-num 1)
+  (activate-next-workspace)
+  (activate-previous-workspace))
 

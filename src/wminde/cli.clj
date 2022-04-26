@@ -1,6 +1,7 @@
 (ns wminde.cli
   "Command-line interface abstraction."
-  (:require [clojure.spec.alpha :as s]
+  (:require [better-cond.core :as b]
+            [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [wminde.workspace :as workspace]
             [utils.common :as c]
@@ -73,11 +74,26 @@
       (r/r :success version)
 
       (:desktop :workspace)
-      (let [workspace-num-str (-> parse-r :cmd-args first)
-            workspace-num (c/parse-int workspace-num-str)]
-        (if (zero? workspace-num)
-          (r/r :error (c/fmt ["Expected workspace specification to be a "
-                              "positive integer but was '%s'"]
-                             workspace-num-str))
-          (workspace/set-active-workspace workspace-num))))))
+      (b/cond
+        let [workspace-spec (-> parse-r :cmd-args first)]
+
+        (nil? workspace-spec)
+        (r/r :error "No workspace specification provided")
+
+        (= "next" (str/lower-case workspace-spec))
+        (workspace/activate-next-workspace)
+
+        (= "previous" (str/lower-case workspace-spec))
+        (workspace/activate-previous-workspace)
+
+        let [workspace-num (c/parse-int workspace-spec)]
+
+        (zero? workspace-num)
+        (r/r :error (c/fmt ["Expected workspace specification to be a "
+                            "positive integer, 'next' or 'previous' but "
+                            "was '%s'"]
+                           workspace-spec))
+
+        :else
+        (workspace/activate-workspace-num workspace-num)))))
 

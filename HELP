@@ -6,7 +6,7 @@ USAGE: wminde <command> [<args>]
 
 COMMANDS:
 
-desktop, workspace [NUM]
+desktop, workspace [<NUM> | next | previous]
   Go to the specified desktop/workspace (1-based index)
 
 help, --help, -h
