@@ -16,4 +16,6 @@
 
   Returns 0 on success, otherwise a positive integer."
   [& args]
-  (cli/action! (cli/parse args)))
+  (cli/action! (cli/parse args))
+  (System/exit 0))
+

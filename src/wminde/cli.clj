@@ -2,6 +2,7 @@
   "Command-line interface abstraction."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
+            [wminde.workspace :as workspace]
             [utils.common :as c]
             [utils.results :as r]))
 
@@ -73,5 +74,10 @@
     :version (println version)
 
     (:desktop :workspace)
-    (println :TODO)))
+    (let [workspace-num-str (-> parse-r :cmd-args first)
+          workspace-num (c/parse-int workspace-num-str)]
+      (if (not (pos-int? workspace-num))
+        (c/abort 1 (c/fmt "Workspace number must be a positive integer but was '%s'"
+                          workspace-num-str))
+        (workspace/set-active-workspace workspace-num)))))
 
