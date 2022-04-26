@@ -1,7 +1,6 @@
 (ns utils.common
   "Common/generic utilities."
-  (:require [better-cond.core :as b]
-            [clojure.java.shell :as sh]
+  (:require [clojure.java.shell :as sh]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [clojure.java.io :as io]

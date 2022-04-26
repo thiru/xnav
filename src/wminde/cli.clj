@@ -2,8 +2,6 @@
   "Command-line interface abstraction."
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as str]
-            [better-cond.core :as b]
-            [puget.printer :as puget]
             [utils.common :as c]
             [utils.results :as r]))
 
