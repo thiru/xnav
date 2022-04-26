@@ -31,19 +31,21 @@
 
 
 
-(s/fdef abort
-        :args (s/cat :exit-code (s/and int? non-neg?)
-                     :msg any?)
+(s/fdef exit!
+        :args (s/cat :result ::r/result)
         :ret nil?)
 
-(defn abort
-  "Abort app with the given exit code and message."
-  [exit-code msg]
-  (if (zero? exit-code)
-    (println msg)
+(defn exit!
+  "Exit app with a success/failure exit code based on the given result.
+  The result's message is also printed to stdout or stderr as appropriate."
+  [result]
+  (if (r/success? result)
+    (println (:message result))
     (binding [*out* *err*]
-      (println msg)))
-  (System/exit exit-code))
+      (println (:message result))))
+  (System/exit (case (:level result)
+                 (:success :trace :info :warn :debug) 0
+                 1)))
 
 
 

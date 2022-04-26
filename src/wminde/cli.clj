@@ -17,7 +17,7 @@
 
 (s/def ::cmd-name keyword?)
 (s/def ::cmd-args (s/coll-of string?))
-(s/def ::parse-r (s/keys :req-un [:r/level :r/message
+(s/def ::parse-r (s/keys :req-un [::r/level ::r/message
                                   ::cmd-name ::cmd-args]))
 (s/fdef parse
         :args (s/cat :args (s/coll-of string?))
@@ -58,26 +58,27 @@
 
 
 
-(s/fdef action!
+(s/fdef run-cmd
         :args (s/cat :cli-r ::parse-r)
-        :ret nil?)
+        :ret ::r/result)
 
-(defn action!
-  "Action the specified CLI command."
-  [parse-r]
-  (when (r/failed? parse-r)
-    (c/abort 1 (:message parse-r)))
+(defn run-cmd [parse-r]
+  (if (r/failed? parse-r)
+    parse-r
+    (case (:cmd-name parse-r)
+      :help
+      (r/r :success help)
 
-  (case (:cmd-name parse-r)
-    :help (println help)
+      :version
+      (r/r :success version)
 
-    :version (println version)
-
-    (:desktop :workspace)
-    (let [workspace-num-str (-> parse-r :cmd-args first)
-          workspace-num (c/parse-int workspace-num-str)]
-      (if (not (pos-int? workspace-num))
-        (c/abort 1 (c/fmt "Workspace number must be a positive integer but was '%s'"
-                          workspace-num-str))
-        (workspace/set-active-workspace workspace-num)))))
+      (:desktop :workspace)
+      (let [workspace-num-str (-> parse-r :cmd-args first)
+            workspace-num (c/parse-int workspace-num-str)]
+        (if (not (pos-int? workspace-num))
+          (r/r :error (c/fmt "Workspace number must be a positive integer but was '%s'"
+                             workspace-num-str))
+          (do
+            (workspace/set-active-workspace workspace-num)
+            (r/r :success "")))))))
 
