@@ -75,10 +75,9 @@
       (:desktop :workspace)
       (let [workspace-num-str (-> parse-r :cmd-args first)
             workspace-num (c/parse-int workspace-num-str)]
-        (if (not (pos-int? workspace-num))
-          (r/r :error (c/fmt "Workspace number must be a positive integer but was '%s'"
+        (if (zero? workspace-num)
+          (r/r :error (c/fmt ["Expected workspace specification to be a "
+                              "positive integer but was '%s'"]
                              workspace-num-str))
-          (do
-            (workspace/set-active-workspace workspace-num)
-            (r/r :success "")))))))
+          (workspace/set-active-workspace workspace-num))))))
 

@@ -62,6 +62,11 @@
   (xdotool) never indicates an error."
   [num]
   (b/cond
+    (not (pos-int? num))
+    (r/r :error
+         (c/fmt "Workspace number must be a positive integer but was '%d'"
+                num))
+
     let [cmd-r (c/sh-r "xdotool" "set_desktop" (str (dec num)))]
 
     (r/failed? cmd-r)
