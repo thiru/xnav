@@ -1,9 +1,23 @@
 (ns wminde.workspace
   (:require [better-cond.core :as b]
+            [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [utils.common :as c]
             [utils.results :as r]))
+
+
+
+(def cache-dir (str (System/getProperty "user.home") "/.cache/wminde"))
+(def last-workspace-file (str cache-dir "/last-workspace"))
+
+
+
+(defn init
+  "Create cache dir to store last active workspace."
+  []
+  (io/make-parents cache-dir "some-file")
+  (spit last-workspace-file ""))
 
 
 
@@ -29,7 +43,7 @@
 
 
 (s/fdef get-active-workspace
-        :ret (s/or :count int?
+        :ret (s/or :num int?
                    :error-result ::r/result))
 
 (defn get-active-workspace
@@ -72,6 +86,8 @@
     (r/failed? cmd-r)
     (assoc cmd-r :message (str "Failed to set the active workspace to " num))
 
+    do (spit last-workspace-file num)
+
     :else
     cmd-r))
 
@@ -91,6 +107,13 @@
 
     (r/failed? cmd-r)
     (assoc cmd-r :message "Failed to activate the next workspace")
+
+    let [curr-workspace-r (get-active-workspace)]
+
+    do (if (r/failed? curr-workspace-r)
+         (binding [*out* *err*]
+           (println (:message curr-workspace-r)))
+         (spit last-workspace-file curr-workspace-r))
 
     :else
     cmd-r))
@@ -112,12 +135,53 @@
     (r/failed? cmd-r)
     (assoc cmd-r :message "Failed to activate the previous workspace")
 
+    let [curr-workspace-r (get-active-workspace)]
+
+    do (if (r/failed? curr-workspace-r)
+         (binding [*out* *err*]
+           (println (:message curr-workspace-r)))
+         (spit last-workspace-file curr-workspace-r))
+
+    :else
+    cmd-r))
+
+
+
+(s/fdef activate-last-workspace
+        :ret ::r/result)
+
+(defn activate-last-workspace
+  "Set the active workspace to the last one that was active (like many OS' use
+  ALT-TAB for windows).
+
+  NOTE: this will always return a successful result since the underlying tool
+  (xdotool) never indicates an error."
+  []
+  (b/cond
+    let [last-workspace-str (slurp last-workspace-file)]
+
+    (str/blank? last-workspace-str)
+    (r/r :warn "Last workspace unknown")
+
+    let [last-workspace-num (-> last-workspace-str str/trim c/parse-int)]
+
+    (zero? last-workspace-num)
+    (r/r :error (c/fmt ["Expected last workspace to be a positive integer but "
+                        "was '%s'"]
+                       last-workspace-num))
+
+    let [cmd-r (activate-workspace-num last-workspace-num)]
+
+    (r/failed? cmd-r)
+    (assoc cmd-r :message "Failed to activate the last active workspace")
+
     :else
     cmd-r))
 
 
 
 (comment
+  (init)
   (get-num-workspaces)
   (get-active-workspace)
   (activate-workspace-num 1)

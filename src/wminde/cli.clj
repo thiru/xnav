@@ -80,11 +80,16 @@
         (nil? workspace-spec)
         (r/r :error "No workspace specification provided")
 
-        (= "next" (str/lower-case workspace-spec))
+        let [workspace-spec (str/lower-case workspace-spec)]
+
+        (= "next" workspace-spec)
         (workspace/activate-next-workspace)
 
-        (= "previous" (str/lower-case workspace-spec))
+        (= "previous" workspace-spec)
         (workspace/activate-previous-workspace)
+
+        (= "last" workspace-spec)
+        (workspace/activate-last-workspace)
 
         let [workspace-num (c/parse-int workspace-spec)]
 
