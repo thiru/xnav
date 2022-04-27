@@ -1,67 +1,10 @@
 (ns wminde.workspace
   (:require [better-cond.core :as b]
-            [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
+            [wminde.workspace.utils :as wsu]
             [utils.common :as c]
             [utils.results :as r]))
-
-
-
-(def cache-dir (str (System/getProperty "user.home") "/.cache/wminde"))
-(def last-workspace-file (str cache-dir "/last-workspace"))
-
-
-
-(defn init
-  "Create cache dir to store last active workspace."
-  []
-  (io/make-parents cache-dir "some-file")
-  (spit last-workspace-file ""))
-
-
-
-(s/fdef get-num-workspaces
-        :ret (s/or :count int?
-                   :error-result ::r/result))
-
-(defn get-num-workspaces []
-  (b/cond
-    let [cmd-r (c/sh-r "xdotool" "get_num_desktops")]
-
-    (r/failed? cmd-r)
-    (assoc cmd-r :message "Failed to get number of workspaces")
-
-    let [num-workspaces (-> cmd-r :out str/trim c/parse-int)]
-
-    (not (pos-int? num-workspaces))
-    (assoc cmd-r :message "Failed to get number of workspaces")
-
-    :else
-    num-workspaces))
-
-
-
-(s/fdef get-active-workspace
-        :ret (s/or :num int?
-                   :error-result ::r/result))
-
-(defn get-active-workspace
-  "Get the active workspace number (1-based)."
-  []
-  (b/cond
-    let [cmd-r (c/sh-r "xdotool" "get_desktop")]
-
-    (r/failed? cmd-r)
-    (assoc cmd-r :message "Failed to get the active workspace")
-
-    let [active-workspace (-> cmd-r :out str/trim c/parse-int)]
-
-    (not (pos-int? active-workspace))
-    (assoc cmd-r :message "Failed to get the active workspace")
-
-    :else
-    (inc active-workspace)))
 
 
 
@@ -70,7 +13,7 @@
         :ret ::r/result)
 
 (defn activate-workspace-num
-  "Set the active workspace (1-based).
+  "Set the active workspace.
 
   NOTE: this will always return a successful result since the underlying tool
   (xdotool) never indicates an error."
@@ -81,12 +24,13 @@
          (c/fmt "Workspace number must be a positive integer but was '%d'"
                 num))
 
+    do (-> wsu/cache-active-workspace-num r/print-msg)
+
     let [cmd-r (c/sh-r "xdotool" "set_desktop" (str (dec num)))]
 
     (r/failed? cmd-r)
-    (assoc cmd-r :message (str "Failed to set the active workspace to " num))
-
-    do (spit last-workspace-file num)
+    (r/prepend-msg cmd-r (str "Failed to set the active workspace to " num
+                              " due to: "))
 
     :else
     cmd-r))
@@ -97,23 +41,18 @@
         :ret ::r/result)
 
 (defn activate-next-workspace
-  "Set the active workspace to the next (higher, 1-based) one.
+  "Set the active workspace to the next (higher) one.
 
   NOTE: this will always return a successful result since the underlying tool
   (xdotool) never indicates an error."
   []
   (b/cond
+    do (-> wsu/cache-active-workspace-num r/print-msg)
+
     let [cmd-r (c/sh-r "xdotool" "set_desktop" "--relative" "--" "1")]
 
     (r/failed? cmd-r)
-    (assoc cmd-r :message "Failed to activate the next workspace")
-
-    let [curr-workspace-r (get-active-workspace)]
-
-    do (if (r/failed? curr-workspace-r)
-         (binding [*out* *err*]
-           (println (:message curr-workspace-r)))
-         (spit last-workspace-file curr-workspace-r))
+    (r/prepend-msg cmd-r "Failed to activate the next workspace due to: ")
 
     :else
     cmd-r))
@@ -124,7 +63,7 @@
         :ret ::r/result)
 
 (defn activate-previous-workspace
-  "Set the active workspace to the previous (lower, 1-based) one.
+  "Set the active workspace to the previous (lower) one.
 
   NOTE: this will always return a successful result since the underlying tool
   (xdotool) never indicates an error."
@@ -133,14 +72,9 @@
     let [cmd-r (c/sh-r "xdotool" "set_desktop" "--relative" "--" "-1")]
 
     (r/failed? cmd-r)
-    (assoc cmd-r :message "Failed to activate the previous workspace")
+    (r/prepend-msg cmd-r "Failed to activate the previous workspace due to: ")
 
-    let [curr-workspace-r (get-active-workspace)]
-
-    do (if (r/failed? curr-workspace-r)
-         (binding [*out* *err*]
-           (println (:message curr-workspace-r)))
-         (spit last-workspace-file curr-workspace-r))
+    do (-> wsu/cache-active-workspace-num r/print-msg)
 
     :else
     cmd-r))
@@ -158,22 +92,18 @@
   (xdotool) never indicates an error."
   []
   (b/cond
-    let [last-workspace-str (slurp last-workspace-file)]
+    let [last-workspace-r (wsu/get-last-workspace)]
 
-    (str/blank? last-workspace-str)
-    (r/r :warn "Last workspace unknown")
+    (r/failed? last-workspace-r)
+    (r/prepend-msg last-workspace-r "Can't activate last workspace due to: ")
 
-    let [last-workspace-num (-> last-workspace-str str/trim c/parse-int)]
+    do (-> wsu/cache-active-workspace-num r/print-msg)
 
-    (zero? last-workspace-num)
-    (r/r :error (c/fmt ["Expected last workspace to be a positive integer but "
-                        "was '%s'"]
-                       last-workspace-num))
-
-    let [cmd-r (activate-workspace-num last-workspace-num)]
+    let [last-workspace-num last-workspace-r
+         cmd-r (activate-workspace-num last-workspace-num)]
 
     (r/failed? cmd-r)
-    (assoc cmd-r :message "Failed to activate the last active workspace")
+    (r/prepend-msg cmd-r "Can't activate last workspace due to: ")
 
     :else
     cmd-r))
@@ -181,10 +111,8 @@
 
 
 (comment
-  (init)
-  (get-num-workspaces)
-  (get-active-workspace)
   (activate-workspace-num 1)
   (activate-next-workspace)
-  (activate-previous-workspace))
+  (activate-previous-workspace)
+  (activate-last-workspace))
 

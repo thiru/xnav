@@ -39,10 +39,7 @@
   "Exit app with a success/failure exit code based on the given result.
   The result's message is also printed to stdout or stderr as appropriate."
   [result]
-  (if (r/success? result)
-    (println (:message result))
-    (binding [*out* *err*]
-      (println (:message result))))
+  (r/print-msg result)
   (System/exit (case (:level result)
                  (:success :trace :info :warn :debug) 0
                  1)))
