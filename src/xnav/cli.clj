@@ -12,6 +12,7 @@
 (def version (-> (slurp "VERSION")
                  str/trim))
 (def help (-> (slurp "HELP")
+              str/trim
               (format version)))
 
 
