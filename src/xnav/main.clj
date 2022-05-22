@@ -1,7 +1,7 @@
-(ns wminde.main
+(ns xnav.main
   "Entry-point into the application."
   (:require [clojure.spec.alpha :as s]
-            [wminde.cli :as cli]
+            [xnav.cli :as cli]
             [utils.common :as c])
   (:gen-class))
 

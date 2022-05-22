@@ -1,4 +1,4 @@
-# wminde
+# xnav
 
 Window manager-like key bindings for (X11-based) desktop environments.
 
@@ -8,10 +8,10 @@ Window manager-like key bindings for (X11-based) desktop environments.
 
 ## Usage
 
-The easiest way to run wminde is to download the binary under Releases then run:
+The easiest way to run xnav is to download the binary under Releases then run:
 
 ```shell
-$ wminde --help
+$ xnav --help
 ```
 
 To run it from source (requires clojure):

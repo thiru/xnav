@@ -1,8 +1,8 @@
-wminde %s
+xnav %s
 
 Window manager-like key bindings for (X11-based) desktop environments.
 
-USAGE: wminde <command> [<args>]
+USAGE: xnav <command> [<args>]
 
 COMMANDS:
 

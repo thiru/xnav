@@ -1,9 +1,9 @@
-(ns wminde.cli
+(ns xnav.cli
   "Command-line interface abstraction."
   (:require [better-cond.core :as b]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
-            [wminde.workspace :as workspace]
+            [xnav.workspace :as workspace]
             [utils.common :as c]
             [utils.results :as r]))
 
@@ -28,7 +28,7 @@
   "Parse the given CLI arguments."
   [args]
   (if (empty? args)
-    (r/r :error "No command specified. Try running: wminde --help"
+    (r/r :error "No command specified. Try running: xnav --help"
          :cmd-name nil
          :cmd-args [])
 
@@ -52,7 +52,7 @@
 
         :else
         (r/r :error (c/fmt ["Unrecognised command/option: '%s'. Try running: "
-                            "wminde --help"]
+                            "xnav --help"]
                            (first args))
              :cmd-name cmd-kw
              :cmd-args [])))))

@@ -11,7 +11,7 @@
             [reloader.core :as reloader]
             [utils.common :as c]
             [utils.results :as r]
-            [wminde.cli :as cli]))
+            [xnav.cli :as cli]))
 
 (defonce started? (atom false))
 

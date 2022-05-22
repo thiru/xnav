@@ -14,7 +14,7 @@ mkdir -p classes
 mkdir -p target
 
 # Compile Clojure:
-clojure -M -e "(compile 'wminde.main)"
+clojure -M -e "(compile 'xnav.main)"
 
 # Ensure GraalVM native-image program is installed:
 "$GRAALVM_HOME/bin/gu" install native-image
@@ -22,7 +22,7 @@ clojure -M -e "(compile 'wminde.main)"
 # Build stand-alone binary:
 "$GRAALVM_HOME/bin/native-image" \
   -cp "$(clojure -Spath):classes" \
-  -H:Name=target/wminde \
+  -H:Name=target/xnav \
   -H:+ReportExceptionStackTraces \
   --initialize-at-build-time \
   --static \
@@ -31,7 +31,7 @@ clojure -M -e "(compile 'wminde.main)"
   --no-server \
   --report-unsupported-elements-at-runtime \
   "-J-Xmx16g" \
-  wminde.main
+  xnav.main
 
 # Explanation of some of the args above:
 

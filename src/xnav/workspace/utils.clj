@@ -1,4 +1,4 @@
-(ns wminde.workspace.utils
+(ns xnav.workspace.utils
   (:require [better-cond.core :as b]
             [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
@@ -8,7 +8,7 @@
 
 
 
-(def cache-dir (str (System/getProperty "user.home") "/.cache/wminde"))
+(def cache-dir (str (System/getProperty "user.home") "/.cache/xnav"))
 (def last-workspace-file (str cache-dir "/last-workspace"))
 
 
