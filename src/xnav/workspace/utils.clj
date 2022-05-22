@@ -16,7 +16,9 @@
 (defn ensure-cache-dir
   "Create cache dir to store last active workspace."
   []
-  (io/make-parents cache-dir "some-file")
+  (when-not (-> cache-dir io/file (.exists))
+    (println "Created cache dir:" cache-dir)
+    (io/make-parents cache-dir "some-file"))
   (spit last-workspace-file ""))
 
 
@@ -69,13 +71,17 @@
 
 (s/fdef get-last-workspace
         :ret (s/or :num int?
-                   :error-result ::r/result))
+                   :none nil?
+                   :error ::r/result))
 
 (defn get-last-workspace
   "Get the last active workspace number."
   []
   (b/cond
-    let [last-workspace-str (slurp last-workspace-file)]
+    let [last-workspace-str (c/slurp-file last-workspace-file)]
+
+    (r/failed? last-workspace-str)
+    nil
 
     (str/blank? last-workspace-str)
     (r/r :error "Last workspace unknown")
@@ -97,13 +103,20 @@
   the 'last active workspace'."
   []
   (b/cond
-    let [curr-workspace-r (get-active-workspace)]
+    let [curr-workspace (get-active-workspace)]
 
-    (r/failed? curr-workspace-r)
-    (r/prepend-msg curr-workspace-r
+    (r/failed? curr-workspace)
+    (r/prepend-msg curr-workspace
                    "Can't update last workspace file due to: ")
 
-    do (spit last-workspace-file curr-workspace-r)
+    let [last-active-workspace (get-last-workspace)]
+
+    (= last-active-workspace curr-workspace)
+    (r/r :warn
+         "Not saving last workspace since it's the same as the current one")
+
+    do (ensure-cache-dir)
+    do (spit last-workspace-file curr-workspace)
 
     :else
     (r/r :success "")))

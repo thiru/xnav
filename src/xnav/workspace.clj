@@ -23,7 +23,7 @@
          (c/fmt "Workspace number must be a positive integer but was '%d'"
                 num))
 
-    do (-> wsu/cache-active-workspace-num r/print-msg)
+    do (-> (wsu/cache-active-workspace-num) r/print-msg)
 
     let [cmd-r (c/sh-r "xdotool" "set_desktop" (str (dec num)))]
 
@@ -46,7 +46,7 @@
   (xdotool) never indicates an error."
   []
   (b/cond
-    do (-> wsu/cache-active-workspace-num r/print-msg)
+    do (-> (wsu/cache-active-workspace-num) r/print-msg)
 
     let [cmd-r (c/sh-r "xdotool" "set_desktop" "--relative" "--" "1")]
 
@@ -73,7 +73,7 @@
     (r/failed? cmd-r)
     (r/prepend-msg cmd-r "Failed to activate the previous workspace due to: ")
 
-    do (-> wsu/cache-active-workspace-num r/print-msg)
+    do (-> (wsu/cache-active-workspace-num) r/print-msg)
 
     :else
     cmd-r))
@@ -93,10 +93,13 @@
   (b/cond
     let [last-workspace-r (wsu/get-last-workspace)]
 
+    (nil? last-workspace-r)
+    (r/r :warn "No last workspace")
+
     (r/failed? last-workspace-r)
     (r/prepend-msg last-workspace-r "Can't activate last workspace due to: ")
 
-    do (-> wsu/cache-active-workspace-num r/print-msg)
+    do (-> (wsu/cache-active-workspace-num) r/print-msg)
 
     let [last-workspace-num last-workspace-r
          cmd-r (activate-workspace-num last-workspace-num)]
