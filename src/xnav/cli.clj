@@ -32,8 +32,7 @@
          :cmd-name nil
          :cmd-args [])
 
-    (let [cmd-name (first args)
-          cmd-kw (-> cmd-name str/lower-case keyword)]
+    (let [cmd-kw (-> args first str/lower-case keyword)]
       (cond
         (contains? #{:help :--help :-h} cmd-kw)
         (r/r :success ""
