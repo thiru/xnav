@@ -77,7 +77,7 @@
         let [workspace-spec (-> parse-r :cmd-args first)]
 
         (nil? workspace-spec)
-        (r/r :error "No workspace specification provided")
+        (r/r :error "No workspace provided")
 
         let [workspace-spec (str/lower-case workspace-spec)]
 
@@ -93,9 +93,8 @@
         let [workspace-num (c/parse-int workspace-spec)]
 
         (zero? workspace-num)
-        (r/r :error (c/fmt ["Expected workspace specification to be a "
-                            "positive integer, 'next' or 'previous' but "
-                            "was '%s'"]
+        (r/r :error (c/fmt ["Expected workspace to be a positive integer, "
+                            "'next' or 'previous' but was '%s'"]
                            workspace-spec))
 
         :else
