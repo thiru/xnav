@@ -45,7 +45,7 @@
              :cmd-name :version
              :cmd-args [])
 
-        (contains? #{:desktop :workspace} cmd-kw)
+        (contains? #{:workspace} cmd-kw)
         (r/r :success ""
              :cmd-name cmd-kw
              :cmd-args (rest args))
@@ -73,7 +73,7 @@
       :version
       (r/r :success version)
 
-      (:desktop :workspace)
+      :workspace
       (b/cond
         let [workspace-spec (-> parse-r :cmd-args first)]
 

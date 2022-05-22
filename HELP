@@ -6,8 +6,8 @@ USAGE: xnav <command> [<args>]
 
 COMMANDS:
 
-desktop, workspace [<NUM> | next | previous]
-  Go to the specified desktop/workspace (1-based index)
+workspace [<NUM> | next | previous]
+  Go to the specified workspace/desktop (1-based index)
 
 help, --help, -h
   Show this help
