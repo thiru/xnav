@@ -1,7 +1,6 @@
 (ns xnav.workspace
   (:require [better-cond.core :as b]
             [clojure.spec.alpha :as s]
-            [clojure.string :as str]
             [xnav.workspace.utils :as wsu]
             [utils.common :as c]
             [utils.results :as r]))
