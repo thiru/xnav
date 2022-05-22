@@ -65,14 +65,11 @@
 
 (s/fdef slurp-file
         :args (s/cat :file-path string?)
-        :ret (s/or :string string?
-                   :result ::r/result))
+        :ret (s/or :success string?
+                   :error ::r/result))
 
 (defn slurp-file
-  "Read all contents of the given file.
-
-  Returns the contents of the string if successfully read, otherwise a
-  `r/result`."
+  "Read all contents of the given file."
   [file-path]
   (if (str/blank? file-path)
     (r/r :error "No file was provided")

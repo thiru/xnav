@@ -6,6 +6,7 @@
             [clojure.pprint :refer :all]
             [clojure.reflect :refer :all]
             [clojure.repl :refer :all]
+            [clojure.spec.alpha :as s]
             [clojure.string :as str]
             [puget.printer :as puget]
             [reloader.core :as reloader]

@@ -16,10 +16,9 @@
 
 
 
-(s/def ::cmd-name keyword?)
+(s/def ::cmd-name (s/nilable keyword?))
 (s/def ::cmd-args (s/coll-of string?))
-(s/def ::parse-r (s/keys :req-un [::r/level ::r/message
-                                  ::cmd-name ::cmd-args]))
+(s/def ::parse-r (s/keys :req-un [::r/level ::r/message ::cmd-name ::cmd-args]))
 (s/fdef parse
         :args (s/cat :args (s/coll-of string?))
         :ret ::parse-r)
@@ -60,7 +59,7 @@
 
 
 (s/fdef run-cmd
-        :args (s/cat :cli-r ::parse-r)
+        :args (s/cat :parse-r ::parse-r)
         :ret ::r/result)
 
 (defn run-cmd [parse-r]

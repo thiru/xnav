@@ -9,12 +9,11 @@
 
 (s/fdef -main
         :args (s/cat :args (s/coll-of string?))
-        :ret (s/and int? c/non-neg?))
+        :ret (s/or :success zero?
+                   :error pos-int?))
 
 (defn -main
-  "Entry-point into the application.
-
-  Returns 0 on success, otherwise a positive integer."
+  "Entry-point into the application."
   [& args]
   (-> args cli/parse cli/run-cmd c/exit!))
 
